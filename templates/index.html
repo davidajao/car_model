@@ -1,0 +1,71 @@
+{% extends 'base.html' %} {% from 'bootstrap5/form.html' import render_form %}
+{% block title %} Car Information {% endblock %} {% block content %}
+
+<!--
+	TIPS about using Bootstrap-Flask:
+	https://github.com/helloflask/bootstrap-flask
+	https://bootstrap-flask.readthedocs.io/
+-->
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-10 col-lg-8 mx-lg-auto mx-md-auto">
+      <h1 class="pt-5 pb-2">Welcome to the auto shop!</h1>
+
+      <p class="lead">Use this form to submit your vehicle information</p>
+
+      {{ render_form(form) }} 
+      
+      {% if submitted_data %}
+      <div class="pt-5">
+        <h2>Submitted Form Data:</h2>
+        <p><strong>Name:</strong> {{ submitted_data.name }}</p>
+        <p><strong>Email:</strong> {{ submitted_data.email }}</p>
+        <p><strong>Year:</strong> {{ submitted_data.year }}</p>
+        <p><strong>Make:</strong> {{ submitted_data.make }}</p>
+        <p><strong>Model:</strong> {{ submitted_data.model }}</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<script>
+  // Disable Make and Model selects initially
+  document.getElementById("make").disabled = true;
+  document.getElementById("model").disabled = true;
+
+  // Enable Make selects when Year is selected
+  document.getElementById("year").addEventListener("change", function () {
+    document.getElementById("make").disabled = false;
+  });
+
+  // Enable Model selects when Make is selected
+  document.getElementById("make").addEventListener("change", function () {
+    document.getElementById("model").disabled = false;
+  });
+
+  // Update Model options when Make is selected
+  document.getElementById("make").addEventListener("change", function () {
+    var year = document.getElementById("year").value;
+    var make = document.getElementById("make").value;
+    fetch(`/models?year=${year}&make=${make}`)
+      .then((response) => response.json())
+      .then((data) => {
+        var modelSelect = document.getElementById("model");
+        modelSelect.innerHTML = ""; // Clear existing options
+
+        data.models.forEach((model) => {
+          var option = document.createElement("option");
+          option.value = model;
+          option.text = model;
+          modelSelect.appendChild(option);
+        });
+
+        // Enable Model select once options are populated
+        document.getElementById("model").disabled = false;
+      });
+  });
+</script>
+
+{% endblock %}
